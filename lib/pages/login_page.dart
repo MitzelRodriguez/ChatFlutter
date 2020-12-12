@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -59,6 +57,9 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    //listen en false si no se necesita redibujar el widget
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -78,14 +79,23 @@ class __FormState extends State<_Form> {
           ),
           BotonAzul(
             text: 'Ingresar',
-            onPressed: () {
-              print(emailController.text);
-              print(passController.text);
-              //listen en false si no se necesita redibujar el widget
-              final authService =
-                  Provider.of<AuthService>(context, listen: false);
-              authService.login(emailController.text, passController.text);
-            },
+            onPressed: authService.autenticando
+                ? null
+                : () async {
+                    FocusScope.of(context).unfocus();
+
+                    final loginOk = await authService.login(
+                        emailController.text.trim(),
+                        passController.text.trim());
+
+                    if (loginOk) {
+                      print('OK');
+                      //Navegar otra pantalla
+                    } else {
+                      //mostrar alerta
+
+                    }
+                  },
           ),
         ],
       ),
