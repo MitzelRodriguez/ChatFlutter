@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
-
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:realtime_chat/helpers/mostrar_alerta.dart';
+
+import 'package:realtime_chat/services/auth_services.dart';
 
 import 'package:realtime_chat/widgets/boton_azul.dart';
 import 'package:realtime_chat/widgets/custom_input.dart';
@@ -55,6 +59,8 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -79,10 +85,25 @@ class __FormState extends State<_Form> {
           ),
           BotonAzul(
             text: 'Crear Cuenta',
-            onPressed: () {
-              print(emailController.text);
-              print(passController.text);
-            },
+            onPressed: authService.autenticando
+                ? null
+                : () async {
+                    print(nombreController.text);
+                    print(emailController.text);
+                    print(passController.text);
+
+                    final registroOk = await authService.registro(
+                        nombreController.text.trim(),
+                        emailController.text.trim(),
+                        passController.text.trim());
+
+                    if (registroOk == true) {
+                      //Conectar socket server
+                      Navigator.pushReplacementNamed(context, 'usuarios');
+                    } else {
+                      mostrarAlerta(context, 'Registro Incorrecto', registroOk);
+                    }
+                  },
           ),
         ],
       ),

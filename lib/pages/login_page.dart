@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:realtime_chat/services/auth_services.dart';
 
 //widgets
+import 'package:realtime_chat/helpers/mostrar_alerta.dart';
 import 'package:realtime_chat/widgets/boton_azul.dart';
 import 'package:realtime_chat/widgets/custom_input.dart';
 import 'package:realtime_chat/widgets/labels.dart';
@@ -89,11 +90,11 @@ class __FormState extends State<_Form> {
                         passController.text.trim());
 
                     if (loginOk) {
-                      print('OK');
-                      //Navegar otra pantalla
+                      //TODO: Conectar al socket server
+                      Navigator.pushReplacementNamed(context, 'usuarios');
                     } else {
-                      //mostrar alerta
-
+                      mostrarAlerta(context, 'Login Incorrecto',
+                          'Revise sus credenciales de nuevo.');
                     }
                   },
           ),
