@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-import 'package:realtime_chat/models/usuario.dart';
+import 'package:realtime_chat/services/socket_services.dart';
 import 'package:realtime_chat/services/auth_services.dart';
+
+import 'package:realtime_chat/models/usuario.dart';
 
 class UsuariosPage extends StatefulWidget {
   @override
@@ -31,6 +33,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final socketServices = Provider.of<SocketService>(context);
 
     final usuario = authService.usuario;
 
@@ -50,7 +53,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
             color: Colors.black87,
           ),
           onPressed: () {
-            //TODO: desconectar el socket sever
+            socketServices.disconnect();
             Navigator.pushReplacementNamed(context, 'login');
             AuthService.deleteToken();
           },
@@ -58,11 +61,15 @@ class _UsuariosPageState extends State<UsuariosPage> {
         actions: [
           Container(
             margin: EdgeInsets.only(right: 10),
-            //child: Icon(Icons.check_circle, color: Colors.blue[400],),
-            child: Icon(
-              Icons.offline_bolt,
-              color: Colors.red,
-            ),
+            child: (socketServices.serverStatus == ServerStatus.Offline)
+                ? Icon(
+                    Icons.offline_bolt,
+                    color: Colors.red,
+                  )
+                : Icon(
+                    Icons.check_circle,
+                    color: Colors.blue[400],
+                  ),
           ),
         ],
       ),

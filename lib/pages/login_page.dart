@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 //providers
 import 'package:realtime_chat/services/auth_services.dart';
+import 'package:realtime_chat/services/socket_services.dart';
 
 //widgets
 import 'package:realtime_chat/helpers/mostrar_alerta.dart';
@@ -61,6 +62,8 @@ class __FormState extends State<_Form> {
     //listen en false si no se necesita redibujar el widget
     final authService = Provider.of<AuthService>(context);
 
+    final socketService = Provider.of<SocketService>(context);
+
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -90,7 +93,7 @@ class __FormState extends State<_Form> {
                         passController.text.trim());
 
                     if (loginOk) {
-                      //TODO: Conectar al socket server
+                      socketService.connect();
                       Navigator.pushReplacementNamed(context, 'usuarios');
                     } else {
                       mostrarAlerta(context, 'Login Incorrecto',

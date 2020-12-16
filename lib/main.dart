@@ -6,6 +6,7 @@ import 'package:realtime_chat/routes/routes.dart';
 
 //Providers
 import 'package:realtime_chat/services/auth_services.dart';
+import 'package:realtime_chat/services/socket_services.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,9 +15,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        //Globales
         ChangeNotifierProvider(
           //no se necesita el context
           create: (_) => AuthService(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SocketService(),
         ),
       ],
       child: MaterialApp(
