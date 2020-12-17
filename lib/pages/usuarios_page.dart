@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+//Providers
+import 'package:realtime_chat/services/usuarios_services.dart';
 import 'package:realtime_chat/services/socket_services.dart';
 import 'package:realtime_chat/services/auth_services.dart';
+import 'package:realtime_chat/services/chat_service.dart';
 
+//Widgets
 import 'package:realtime_chat/models/usuario.dart';
 
 class UsuariosPage extends StatefulWidget {
@@ -14,21 +17,18 @@ class UsuariosPage extends StatefulWidget {
 }
 
 class _UsuariosPageState extends State<UsuariosPage> {
+  final usuarioService = new UsuariosService();
   //Refresh
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
-  final usuarios = [
-    Usuario(
-        uid: '1', nombre: 'Maria', email: 'test1@correo.com', online: false),
-    Usuario(uid: '2', nombre: 'Juan', email: 'test2@correo.com', online: true),
-    Usuario(
-        uid: '3', nombre: 'Pedro', email: 'test3@correo.com', online: false),
-    Usuario(
-        uid: '4', nombre: 'Martha', email: 'test4@correo.com', online: true),
-    Usuario(
-        uid: '5', nombre: 'Melissa', email: 'test5@correo.com', online: false),
-  ];
+  List<Usuario> usuarios = [];
+
+  @override
+  void initState() {
+    this._cargarUsuarios(); //Obtener listado de usuarios al entrar a la pantalla usuarios
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,12 +106,18 @@ class _UsuariosPageState extends State<UsuariosPage> {
           borderRadius: BorderRadius.circular(100),
         ),
       ),
+      onTap: () {
+        final chatService = Provider.of<ChatService>(context, listen: false);
+        chatService.usuarioPara = usuario;
+        Navigator.pushNamed(context, 'chat');
+      },
     );
   }
 
-  Future<String> _cargarUsuarios() async {
-    // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
+  _cargarUsuarios() async {
+    this.usuarios = await usuarioService.getUsuarios();
+    setState(() {});
+    // await Future.delayed(Duration(milliseconds: 1000));
     // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
   }
