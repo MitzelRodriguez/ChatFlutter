@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:realtime_chat/services/auth_services.dart';
 
 //Provider
 import 'package:realtime_chat/services/chat_service.dart';
+import 'package:realtime_chat/services/socket_services.dart';
 
 //Widgets
 import 'package:realtime_chat/widgets/chat_message.dart';
@@ -18,13 +20,46 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
+
+  ChatService chatService;
+  SocketService socketService;
+  AuthService authService;
+
   List<ChatMessage> _messages = [];
 
   bool _writing = false;
 
   @override
+  void initState() {
+    super.initState();
+    this.chatService = Provider.of<ChatService>(context, listen: false);
+    this.socketService = Provider.of<SocketService>(context, listen: false);
+    this.authService = Provider.of<AuthService>(context, listen: false);
+    this.socketService.socket.on('mensaje-personal', _listenMessage);
+  }
+
+  //Escuchar mensaje
+  void _listenMessage(dynamic payload) {
+    ChatMessage message = new ChatMessage(
+      texto: payload['mensaje'],
+      uuid: payload['de'],
+      animationController: AnimationController(
+        vsync: this,
+        duration: Duration(
+          milliseconds: 300,
+        ),
+      ),
+    );
+
+    setState(() {
+      _messages.insert(0, message);
+    });
+
+    message.animationController.forward();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final chatService = Provider.of<ChatService>(context);
     final usuarioPara = chatService.usuarioPara;
 
     return Scaffold(
@@ -134,8 +169,6 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
           color: Colors.blue,
         ),
         child: IconButton(
-          // highlightColor: Colors.transparent,
-          // splashColor: Colors.transparent,
           icon: Icon(
             Icons.send,
           ),
@@ -168,6 +201,12 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     setState(() {
       _writing = false;
     });
+
+    this.socketService.emit('mensaje personal', {
+      'de': this.authService.usuario.uid,
+      'para': this.chatService.usuarioPara.uid,
+      'mensaje': texto,
+    });
   }
 
   @override
@@ -177,6 +216,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     for (ChatMessage message in _messages) {
       message.animationController.dispose();
     }
+
+    this.socketService.socket.off('mensaje-personal');
     super.dispose();
   }
 }
