@@ -1,6 +1,8 @@
 //burbujas de los mensajes
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:realtime_chat/services/auth_services.dart';
 
 class ChatMessage extends StatelessWidget {
   final String texto;
@@ -16,6 +18,8 @@ class ChatMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+
     return FadeTransition(
       opacity: animationController,
       child: SizeTransition(
@@ -24,7 +28,9 @@ class ChatMessage extends StatelessWidget {
           parent: animationController,
         ),
         child: Container(
-          child: this.uuid == '123' ? myMessage() : anotherMessage(),
+          child: this.uuid == authService.usuario.uid
+              ? myMessage()
+              : anotherMessage(),
         ),
       ),
     );

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import 'package:realtime_chat/global/enviroment.dart';
+import 'package:realtime_chat/global/environment.dart';
 import 'package:realtime_chat/models/login_response.dart';
 import 'package:realtime_chat/models/usuario.dart';
 
@@ -46,7 +46,7 @@ class AuthService with ChangeNotifier {
     };
 
     final resp = await http.post(
-      '${Enviroment.apiUrl}/login',
+      '${Environment.apiUrl}/login',
       //Argumentos a mandar
       body: jsonEncode(data),
       headers: {'Content-Type': 'application/json'},
@@ -74,7 +74,7 @@ class AuthService with ChangeNotifier {
     final data = {'nombre': nombre, 'email': email, 'password': password};
 
     final resp = await http.post(
-      '${Enviroment.apiUrl}/login/new',
+      '${Environment.apiUrl}/login/new',
       //Argumentos a mandar
       body: jsonEncode(data),
       headers: {'Content-Type': 'application/json'},
@@ -99,7 +99,7 @@ class AuthService with ChangeNotifier {
     final token = await this._storage.read(key: 'token');
 
     final resp = await http.get(
-      '${Enviroment.apiUrl}/login/renew',
+      '${Environment.apiUrl}/login/renew',
       headers: {'Content-Type': 'application/json', 'x-token': token},
     );
 

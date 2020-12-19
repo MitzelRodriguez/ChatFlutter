@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:realtime_chat/services/auth_services.dart';
 
-//Provider
+//models
+import 'package:realtime_chat/models/mensajes_response.dart';
+
+//Provider servicios
 import 'package:realtime_chat/services/chat_service.dart';
 import 'package:realtime_chat/services/socket_services.dart';
+import 'package:realtime_chat/services/auth_services.dart';
 
 //Widgets
 import 'package:realtime_chat/widgets/chat_message.dart';
@@ -36,6 +39,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     this.socketService = Provider.of<SocketService>(context, listen: false);
     this.authService = Provider.of<AuthService>(context, listen: false);
     this.socketService.socket.on('mensaje-personal', _listenMessage);
+    _cargarHistorial(this.chatService.usuarioPara.uid);
   }
 
   //Escuchar mensaje
@@ -56,6 +60,23 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     });
 
     message.animationController.forward();
+  }
+
+  //Cargar lista de mensajes
+  void _cargarHistorial(String usuarioID) async {
+    List<Mensaje> chat = await this.chatService.getChat(usuarioID);
+
+    final history = chat.map((m) => new ChatMessage(
+          texto: m.mensaje,
+          uuid: m.de,
+          animationController: new AnimationController(
+              vsync: this, duration: Duration(milliseconds: 0))
+            ..forward(),
+        ));
+
+    setState(() {
+      _messages.insertAll(0, history);
+    });
   }
 
   @override
@@ -187,7 +208,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
     //Ingresar nuevo mensaje
     final newMessage = new ChatMessage(
-      uuid: '123',
+      uuid: authService.usuario.uid,
       texto: texto,
       animationController: AnimationController(
         vsync: this,
@@ -202,7 +223,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       _writing = false;
     });
 
-    this.socketService.emit('mensaje personal', {
+    this.socketService.emit('mensaje-personal', {
       'de': this.authService.usuario.uid,
       'para': this.chatService.usuarioPara.uid,
       'mensaje': texto,

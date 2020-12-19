@@ -1,6 +1,6 @@
 import 'dart:io';
 
-class Enviroment {
+class Environment {
   //Metodos estaticos
   static String apiUrl = Platform.isAndroid
       ? 'http://10.0.2.2:3000/api'
